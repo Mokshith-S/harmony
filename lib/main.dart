@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:harmony/bloc/harmony_bloc.dart';
+import 'package:harmony/create_harmony.dart';
 import 'package:harmony/harmony_home.dart';
-import 'package:harmony/new_page.dart';
 
 void main() {
   runApp(const HarmonyController());
@@ -19,7 +19,7 @@ class HarmonyController extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => const HarmonyHome(),
-          'temp': (context) => const TempRoute(),
+          'control_panel': (context) => const HarmonyPanel(),
         },
       ),
     );

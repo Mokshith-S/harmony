@@ -41,6 +41,7 @@ class _SingleWaveAnimationState extends State<SingleWaveAnimation>
     with SingleTickerProviderStateMixin {
   late final AnimationController _control;
   late final Animation<double> _animation;
+  bool disposing = true;
 
   @override
   void initState() {
@@ -55,29 +56,33 @@ class _SingleWaveAnimationState extends State<SingleWaveAnimation>
   }
 
   @override
+  void dispose() {
+    _control.dispose();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocListener<HarmonyBloc, HarmonyState>(
-      listener: (context, state) {
-        if (state is PlayState) {
-          if (state.harmonyId == widget.harmonyId) {
-            _control.repeat(reverse: true);
-          }
-        } else if (state is StopState) {
-          if (state.harmonyId == widget.harmonyId) {
-            _control.reset();
-          }
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.only(left: 4, right: 4),
-        width: 8,
-        height: _animation.value,
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(
-            Radius.circular(8),
-          ),
-          color: Colors.white,
+    final harmonyState = context.watch<HarmonyBloc>().state;
+    if (harmonyState is PlayState &&
+        harmonyState.harmonyId == widget.harmonyId &&
+        !_control.isAnimating) {
+      _control.repeat(reverse: true);
+    } else if (harmonyState is StopState &&
+        harmonyState.harmonyId == widget.harmonyId &&
+        _control.isAnimating) {
+      _control.reset();
+    }
+    return Container(
+      margin: const EdgeInsets.only(left: 4, right: 4),
+      width: 8,
+      height: _animation.value,
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(
+          Radius.circular(8),
         ),
+        color: Colors.white,
       ),
     );
   }

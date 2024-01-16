@@ -89,7 +89,8 @@ class _HarmonyHomeState extends State<HarmonyHome>
                   alignment:
                       pressed ? Alignment.topCenter : Alignment.bottomCenter,
                   child: InkWell(
-                    onTap: () => Navigator.of(context).pushNamed('temp'),
+                    onTap: () =>
+                        Navigator.of(context).pushNamed('control_panel'),
                     child: Container(
                       height: 60,
                       width: 60,

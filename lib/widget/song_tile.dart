@@ -45,10 +45,9 @@ class SongTile extends StatelessWidget {
                   SongControl(
                       icon: Icons.fast_rewind_rounded, controlLogic: () {}),
                   SongControl(
-                      icon: state is PlayState &&
-                              state.harmonyId == 'Creation-$index'
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
+                      icon: Icons.play_arrow_rounded,
+                      iconSelected: Icons.pause_rounded,
+                      selected: true,
                       controlLogic: state is PlayState
                           ? () {
                               context
@@ -61,7 +60,7 @@ class SongTile extends StatelessWidget {
                                   .add(PlayEvent('Creation-$index'));
                             }),
                   SongControl(
-                      icon: Icons.fast_rewind_rounded, controlLogic: () {}),
+                      icon: Icons.fast_forward_rounded, controlLogic: () {}),
                 ],
               )
             ],
