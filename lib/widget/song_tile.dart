@@ -35,7 +35,10 @@ class SongTile extends StatelessWidget {
               const SizedBox(
                 height: 8,
               ),
-              SongWave(waveRunning: false, harmonyId: 'Creation-$index'),
+              SongWave(
+                waveRunning:
+                    state is PlayState && state.harmonyId == 'Creation-$index',
+              ),
               const SizedBox(
                 height: 8,
               ),
@@ -45,16 +48,19 @@ class SongTile extends StatelessWidget {
                   SongControl(
                       icon: Icons.fast_rewind_rounded, controlLogic: () {}),
                   SongControl(
-                      icon: Icons.play_arrow_rounded,
-                      iconSelected: Icons.pause_rounded,
-                      selected: true,
-                      controlLogic: state is PlayState
+                      icon: state is PlayState &&
+                              state.harmonyId == 'Creation-$index'
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
+                      controlLogic: state is PlayState &&
+                              state.harmonyId == 'Creation-$index'
                           ? () {
                               context
                                   .read<HarmonyBloc>()
                                   .add(StopEvent('Creation-$index'));
                             }
                           : () {
+                              context.read<HarmonyBloc>().add(InitialEvent());
                               context
                                   .read<HarmonyBloc>()
                                   .add(PlayEvent('Creation-$index'));

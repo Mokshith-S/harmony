@@ -3,7 +3,11 @@ import 'package:harmony/bloc/harmony_event.dart';
 import 'package:harmony/bloc/harmony_state.dart';
 
 class HarmonyBloc extends Bloc<HarmonyEvent, HarmonyState> {
-  HarmonyBloc() : super(HarmonyInitial()) {
+  HarmonyBloc() : super(InitialState()) {
+    // print(state);
+    on<InitialEvent>((event, emit) {
+      emit(InitialState());
+    });
     on<PlayEvent>((event, emit) {
       emit(PlayState(event.harmonyId));
     });

@@ -4,6 +4,7 @@ import 'package:harmony/bloc/harmony_bloc.dart';
 import 'package:harmony/bloc/harmony_state.dart';
 import 'package:harmony/widget/bottompop.dart';
 import 'package:harmony/widget/song_tile.dart';
+import 'package:file_picker/file_picker.dart';
 
 class HarmonyHome extends StatefulWidget {
   const HarmonyHome({super.key});
@@ -17,6 +18,7 @@ class _HarmonyHomeState extends State<HarmonyHome>
   late final AnimationController floatIcon;
   bool pressed = false;
   late final AnimationController control;
+  String? path;
 
   @override
   void initState() {
@@ -25,6 +27,17 @@ class _HarmonyHomeState extends State<HarmonyHome>
       duration: const Duration(milliseconds: 200),
     );
     super.initState();
+  }
+
+  Future<void> mp3Uploader(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform
+        .pickFiles(type: FileType.custom, allowedExtensions: ['mp3']);
+
+    if (result != null && context.mounted) {
+      path = result.files.single.path;
+      print(path);
+      // Navigator.of(context).pushNamed('control_panel', arguments: path);
+    }
   }
 
   @override
@@ -89,8 +102,7 @@ class _HarmonyHomeState extends State<HarmonyHome>
                   alignment:
                       pressed ? Alignment.topCenter : Alignment.bottomCenter,
                   child: InkWell(
-                    onTap: () =>
-                        Navigator.of(context).pushNamed('control_panel'),
+                    onTap: () => mp3Uploader(context),
                     child: Container(
                       height: 60,
                       width: 60,
@@ -122,7 +134,7 @@ class _HarmonyHomeState extends State<HarmonyHome>
                       decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
-                          boxShadow: state is HarmonyInitial
+                          boxShadow: state is InitialState
                               ? []
                               : [
                                   const BoxShadow(

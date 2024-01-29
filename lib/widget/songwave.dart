@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:harmony/bloc/harmony_bloc.dart';
-import 'package:harmony/bloc/harmony_state.dart';
 
 class SongWave extends StatelessWidget {
-  const SongWave(
-      {super.key, required this.waveRunning, required this.harmonyId});
+  const SongWave({
+    super.key,
+    required this.waveRunning,
+  });
+
   final bool waveRunning;
-  final String harmonyId;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +18,7 @@ class SongWave extends StatelessWidget {
         children: List.generate(
             15,
             (index) => SingleWaveAnimation(
-                  harmonyId: harmonyId,
+                  singleWaveState: waveRunning,
                   duration: duration[index % 5],
                 )),
       ),
@@ -28,10 +27,13 @@ class SongWave extends StatelessWidget {
 }
 
 class SingleWaveAnimation extends StatefulWidget {
-  const SingleWaveAnimation(
-      {super.key, required this.duration, required this.harmonyId});
-  final String harmonyId;
+  const SingleWaveAnimation({
+    super.key,
+    required this.singleWaveState,
+    required this.duration,
+  });
   final int duration;
+  final bool singleWaveState;
 
   @override
   State<SingleWaveAnimation> createState() => _SingleWaveAnimationState();
@@ -41,7 +43,6 @@ class _SingleWaveAnimationState extends State<SingleWaveAnimation>
     with SingleTickerProviderStateMixin {
   late final AnimationController _control;
   late final Animation<double> _animation;
-  bool disposing = true;
 
   @override
   void initState() {
@@ -49,10 +50,10 @@ class _SingleWaveAnimationState extends State<SingleWaveAnimation>
     _control = AnimationController(
         vsync: this, duration: Duration(milliseconds: widget.duration));
     _animation = Tween(begin: 5.0, end: 30.0)
-        .animate(CurvedAnimation(parent: _control, curve: Curves.easeInCubic))
-      ..addListener(() {
-        setState(() {});
-      });
+        .animate(CurvedAnimation(parent: _control, curve: Curves.easeInCubic));
+    // ..addListener(() {
+    //   setState(() {});
+    // });
   }
 
   @override
@@ -64,14 +65,9 @@ class _SingleWaveAnimationState extends State<SingleWaveAnimation>
 
   @override
   Widget build(BuildContext context) {
-    final harmonyState = context.watch<HarmonyBloc>().state;
-    if (harmonyState is PlayState &&
-        harmonyState.harmonyId == widget.harmonyId &&
-        !_control.isAnimating) {
+    if (widget.singleWaveState && !_control.isAnimating) {
       _control.repeat(reverse: true);
-    } else if (harmonyState is StopState &&
-        harmonyState.harmonyId == widget.harmonyId &&
-        _control.isAnimating) {
+    } else {
       _control.reset();
     }
     return Container(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:harmony/bloc/harmony_bloc.dart';
-import 'package:harmony/create_harmony.dart';
-import 'package:harmony/harmony_home.dart';
+
+import 'package:harmony/route/harmony_route.dart';
 
 void main() {
   runApp(const HarmonyController());
@@ -15,12 +15,9 @@ class HarmonyController extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => HarmonyBloc(),
-      child: MaterialApp(
+      child: const MaterialApp(
         initialRoute: '/',
-        routes: {
-          '/': (context) => const HarmonyHome(),
-          'control_panel': (context) => const HarmonyPanel(),
-        },
+        onGenerateRoute: HarmonyRoute.generateRoute,
       ),
     );
   }

@@ -1,6 +1,6 @@
 sealed class HarmonyState {}
 
-final class HarmonyInitial extends HarmonyState {}
+final class InitialState extends HarmonyState {}
 
 final class PlayState extends HarmonyState {
   PlayState(this.harmonyId);
