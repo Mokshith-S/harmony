@@ -12,7 +12,7 @@ class HarmonyRoute {
       case 'control_panel':
         if (args is String) {
           return MaterialPageRoute(
-              builder: (_) => HarmonyPanel(harmonyPath: args));
+              builder: (_) => HarmonyPanel(harmonyAudio: args));
         }
         return errorRoute();
       default:

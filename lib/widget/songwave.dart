@@ -50,10 +50,10 @@ class _SingleWaveAnimationState extends State<SingleWaveAnimation>
     _control = AnimationController(
         vsync: this, duration: Duration(milliseconds: widget.duration));
     _animation = Tween(begin: 5.0, end: 30.0)
-        .animate(CurvedAnimation(parent: _control, curve: Curves.easeInCubic));
-    // ..addListener(() {
-    //   setState(() {});
-    // });
+        .animate(CurvedAnimation(parent: _control, curve: Curves.easeInCubic))
+      ..addListener(() {
+        setState(() {});
+      });
   }
 
   @override
@@ -65,9 +65,10 @@ class _SingleWaveAnimationState extends State<SingleWaveAnimation>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.singleWaveState) {}
     if (widget.singleWaveState && !_control.isAnimating) {
       _control.repeat(reverse: true);
-    } else {
+    } else if (!widget.singleWaveState && _control.isAnimating) {
       _control.reset();
     }
     return Container(

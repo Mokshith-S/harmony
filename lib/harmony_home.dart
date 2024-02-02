@@ -18,7 +18,6 @@ class _HarmonyHomeState extends State<HarmonyHome>
   late final AnimationController floatIcon;
   bool pressed = false;
   late final AnimationController control;
-  String? path;
 
   @override
   void initState() {
@@ -30,13 +29,18 @@ class _HarmonyHomeState extends State<HarmonyHome>
   }
 
   Future<void> mp3Uploader(BuildContext context) async {
-    FilePickerResult? result = await FilePicker.platform
-        .pickFiles(type: FileType.custom, allowedExtensions: ['mp3']);
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['mp3'],
+    );
+
+    setState(() {
+      pressed = !pressed;
+    });
 
     if (result != null && context.mounted) {
-      path = result.files.single.path;
-      print(path);
-      // Navigator.of(context).pushNamed('control_panel', arguments: path);
+      String audio = result.files.single.path!;
+      Navigator.of(context).pushNamed('control_panel', arguments: audio);
     }
   }
 
