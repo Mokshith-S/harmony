@@ -14,15 +14,17 @@ class HarmonyPanel extends StatefulWidget {
   State<HarmonyPanel> createState() => _HarmonyPanelState();
 }
 
-class _HarmonyPanelState extends State<HarmonyPanel> {
+class _HarmonyPanelState extends State<HarmonyPanel>
+    with SingleTickerProviderStateMixin {
   final harmonySong = audio.AudioPlayer();
-  final harmonyTemp = audio.AudioPlayer();
   Duration harmonyTime = const Duration();
   Duration harmonyCurrentTime = const Duration();
-  // final harmonyRecorder = AudioRecorder();
   final harmonyRecorder = FlutterSoundRecorder();
-  // RecordState? harmonyRecordState;
   late final Directory recordPath;
+  bool stopRecordButtonState = false;
+  late AnimationController stopRecordButtonAnimation;
+  bool recording = true;
+  Color? color;
 
   void audioInitializer() async {
     await harmonySong.setSource(audio.DeviceFileSource(widget.harmonyAudio));
@@ -52,7 +54,6 @@ class _HarmonyPanelState extends State<HarmonyPanel> {
     if (status == PermissionStatus.granted) {
       Directory recordDirectory = await path.getApplicationDocumentsDirectory();
       recordPath = await Directory('${recordDirectory.path}/record').create();
-
       await harmonyRecorder.openRecorder();
     }
   }
@@ -61,6 +62,8 @@ class _HarmonyPanelState extends State<HarmonyPanel> {
   void initState() {
     audioInitializer();
     recordInitializer();
+    stopRecordButtonAnimation = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 200));
     super.initState();
   }
 
@@ -68,8 +71,8 @@ class _HarmonyPanelState extends State<HarmonyPanel> {
   void dispose() {
     harmonySong.setReleaseMode(audio.ReleaseMode.release);
     harmonySong.dispose();
-    harmonyTemp.dispose();
     harmonyRecorder.closeRecorder();
+    stopRecordButtonAnimation.dispose();
     super.dispose();
   }
 
@@ -113,49 +116,87 @@ class _HarmonyPanelState extends State<HarmonyPanel> {
                 color: const Color.fromARGB(255, 108, 42, 170),
                 splash: false,
               ),
-              InkWell(
-                borderRadius: BorderRadius.circular(30),
-                onTap: () async {
-                  String? path = await harmonyRecorder.stopRecorder();
-                  print(path);
-                  if (path != null) {
-                    await harmonyTemp.play(audio.DeviceFileSource(path));
-                  }
-                },
-                child: Container(
-                  height: 60,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
+              GestureDetector(
+                onTap: recording
+                    ? () async {
+                        setState(() {
+                          color = const Color.fromARGB(255, 141, 123, 158);
+                          stopRecordButtonAnimation.forward();
+                        });
+                        setState(() {
+                          color = const Color.fromARGB(255, 108, 42, 170)
+                              .withOpacity(0.2);
+                        });
+                        if (harmonyRecorder.isRecording) {
+                          setState(() {});
+                          await harmonyRecorder.pauseRecorder();
+                        } else {
+                          if (harmonyRecorder.isPaused) {
+                            setState(() {});
+                            await harmonyRecorder.resumeRecorder();
+                          } else {
+                            await harmonyRecorder.startRecorder(
+                                toFile: '${recordPath.path}/audio_record');
+                          }
+                        }
+                      }
+                    : () {
+                        setState(() {
+                          color = const Color.fromARGB(255, 141, 123, 158);
+                        });
+                        stopRecordButtonAnimation.forward();
+                      },
+                onLongPress: harmonyRecorder.isPaused
+                    ? () {
+                        if (!harmonyRecorder.isStopped) {
+                          setState(() {
+                            color = const Color.fromARGB(255, 141, 123, 158);
+
+                            stopRecordButtonAnimation.repeat(reverse: true);
+                            stopRecordButtonState = true;
+                          });
+                          harmonyRecorder.stopRecorder();
+                          // Recording is stopped here
+                        }
+                      }
+                    : null,
+                onLongPressUp: harmonyRecorder.isPaused
+                    ? () {
+                        if (!harmonyRecorder.isStopped) {
+                          setState(() {
+                            color = null;
+                            stopRecordButtonAnimation.reset();
+                            recording = false;
+                          });
+                        }
+                      }
+                    : null,
+                child: Stack(alignment: Alignment.center, children: [
+                  FadeTransition(
+                    opacity: Tween<double>(begin: 1, end: 0).animate(
+                      CurvedAnimation(
+                          parent: stopRecordButtonAnimation,
+                          curve: Curves.easeIn),
+                    ),
+                    child: Container(
+                      height: 60,
+                      width: 60,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: color,
+                      ),
+                    ),
                   ),
-                  width: 60,
-                  child: const Icon(
-                    Icons.mic_none_rounded,
+                  Icon(
+                    stopRecordButtonState
+                        ? Icons.mic_off_rounded
+                        : harmonyRecorder.isPaused
+                            ? Icons.stop
+                            : Icons.mic_none_rounded,
                     size: 30,
-                    color: Color.fromARGB(255, 108, 42, 170),
+                    color: const Color.fromARGB(255, 108, 42, 170),
                   ),
-                ),
-              ),
-              SongControl(
-                icon: harmonyRecorder.isPaused
-                    ? Icons.stop
-                    : Icons.mic_none_rounded,
-                controlLogic: () async {
-                  if (harmonyRecorder.isRecording) {
-                    print('Recording paused');
-                    await harmonyRecorder.pauseRecorder();
-                  } else {
-                    if (harmonyRecorder.isPaused) {
-                      print('Recording resume');
-                      await harmonyRecorder.resumeRecorder();
-                    } else {
-                      print('Recording started');
-                      await harmonyRecorder.startRecorder(
-                          toFile: recordPath.path);
-                    }
-                  }
-                },
-                color: const Color.fromARGB(255, 108, 42, 170),
-                splash: false,
+                ]),
               ),
             ],
           ),
