@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:audioplayers/audioplayers.dart' as audio;
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:harmony/widget/song_control.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart' as path;
@@ -89,14 +91,22 @@ class _HarmonyPanelState extends State<HarmonyPanel>
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 30, right: 30, bottom: 30),
-            child: LinearProgressIndicator(
-              backgroundColor: const Color.fromARGB(255, 198, 198, 198),
-              color: const Color.fromARGB(255, 145, 56, 229),
-              minHeight: 10.0,
-              value: harmonyTime.inSeconds != 0
-                  ? harmonyCurrentTime.inSeconds / harmonyTime.inSeconds
-                  : 0.0,
-              borderRadius: BorderRadius.circular(5.0),
+            child: ProgressBar(
+              progress: harmonyCurrentTime,
+              total: harmonyTime,
+              onSeek: (value) {
+                harmonySong.seek(value);
+              },
+              barHeight: 10.0,
+              baseBarColor: const Color.fromARGB(255, 198, 198, 198),
+              progressBarColor: const Color.fromARGB(255, 145, 56, 229),
+              thumbColor: const Color.fromARGB(255, 145, 56, 229),
+              thumbGlowRadius: 20.0,
+              timeLabelPadding: 4.0,
+              timeLabelTextStyle: GoogleFonts.baloo2(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15),
             ),
           ),
           Row(
@@ -119,54 +129,48 @@ class _HarmonyPanelState extends State<HarmonyPanel>
               GestureDetector(
                 onTap: recording
                     ? () async {
+                        stopRecordButtonAnimation.reset();
                         setState(() {
-                          color = const Color.fromARGB(255, 141, 123, 158);
-                          stopRecordButtonAnimation.forward();
+                          color = const Color.fromARGB(255, 213, 211, 215);
                         });
-                        setState(() {
-                          color = const Color.fromARGB(255, 108, 42, 170)
-                              .withOpacity(0.2);
-                        });
+                        stopRecordButtonAnimation.forward();
+
                         if (harmonyRecorder.isRecording) {
-                          setState(() {});
                           await harmonyRecorder.pauseRecorder();
                         } else {
                           if (harmonyRecorder.isPaused) {
-                            setState(() {});
                             await harmonyRecorder.resumeRecorder();
                           } else {
                             await harmonyRecorder.startRecorder(
                                 toFile: '${recordPath.path}/audio_record');
                           }
                         }
+                        setState(() {});
                       }
                     : () {
+                        stopRecordButtonAnimation.reset();
                         setState(() {
-                          color = const Color.fromARGB(255, 141, 123, 158);
+                          color = const Color.fromARGB(255, 213, 211, 215);
                         });
                         stopRecordButtonAnimation.forward();
                       },
                 onLongPress: harmonyRecorder.isPaused
-                    ? () {
+                    ? () async {
                         if (!harmonyRecorder.isStopped) {
                           setState(() {
-                            color = const Color.fromARGB(255, 141, 123, 158);
+                            color = const Color.fromARGB(255, 213, 211, 215);
 
                             stopRecordButtonAnimation.repeat(reverse: true);
                             stopRecordButtonState = true;
                           });
-                          harmonyRecorder.stopRecorder();
+                          await harmonyRecorder.stopRecorder();
                           // Recording is stopped here
-                        }
-                      }
-                    : null,
-                onLongPressUp: harmonyRecorder.isPaused
-                    ? () {
-                        if (!harmonyRecorder.isStopped) {
-                          setState(() {
-                            color = null;
-                            stopRecordButtonAnimation.reset();
-                            recording = false;
+                          Future.delayed(const Duration(milliseconds: 500), () {
+                            setState(() {
+                              color = null;
+                              stopRecordButtonAnimation.reset();
+                              recording = false;
+                            });
                           });
                         }
                       }

@@ -43,6 +43,7 @@ dependencies:
   audio_video_progress_bar: ^2.0.1
   flutter_sound: ^9.2.13
   permission_handler: ^11.0.1
+  flutter_ffmpeg: ^0.4.2
 
 dev_dependencies:
   flutter_test:
